@@ -227,7 +227,70 @@ WHERE faculty_id = (
 
 -- Subqueries including 5 tables
 
+/*
+What is a Co-related Subquery?
+- A co-related subquery is a subquery that uses values from the outer query.
+- Unlike a normal subquery (which runs once), a co-related subquery is executed repeatedly — once for each row processed by the outer query.
+- So, it is row-by-row comparison.
 
+Syntax -
+
+SELECT column1, column2
+FROM table1 t1
+WHERE column1 operator
+      (SELECT columnX 
+       FROM table2 t2
+       WHERE t1.columnY = t2.columnY);
+
+- t1 is from outer query
+- t2 is from inner query
+- The subquery references columns of the outer query (t1.columnY).
+
+
+🔹 Key Points
+
+- Normal Subquery → Executes once and result is used by outer query.
+- Co-related Subquery → Executes for each row of outer query.
+- Commonly used with operators: =, >, <, >=, <=, IN, EXISTS, ANY, ALL.
+- Performance can be slower for large data, but sometimes unavoidable.
+*/
+
+-- Example 1: Find Employees earning more than the average salary of their own department
+SELECT e.emp_id, e.emp_name, e.salary, e.dept_id
+FROM employees e
+WHERE e.salary > (
+      SELECT AVG(e2.salary)
+      FROM employees e2
+      WHERE e.dept_id = e2.dept_id
+);
+
+-- Example 2: Find Students who scored more than the average marks in their own class
+SELECT s.student_id, s.student_name, s.class, s.marks
+FROM students s
+WHERE s.marks > (
+      SELECT AVG(s2.marks)
+      FROM students s2
+      WHERE s.class = s2.class
+);
+
+-- Example 3: Find Employees whose salary is greater than at least one employee in the same department
+SELECT e.emp_id, e.emp_name, e.salary, e.dept_id
+FROM employees e
+WHERE e.salary > ANY (
+      SELECT e2.salary
+      FROM employees e2
+      WHERE e.dept_id = e2.dept_id
+        AND e.emp_id <> e2.emp_id
+);
+
+-- Example 4: Find Employees who get the maximum salary in their department
+SELECT e.emp_id, e.emp_name, e.salary, e.dept_id
+FROM employees e
+WHERE e.salary = (
+      SELECT MAX(e2.salary)
+      FROM employees e2
+      WHERE e.dept_id = e2.dept_id
+);
 
 -- Sub-Queries with 2 Tables
 
